@@ -1,7 +1,10 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AnyAction, createSlice, Dispatch, PayloadAction } from "@reduxjs/toolkit";
+import axios from "axios";
 import { Item } from "../../model/item.model";
 import { Product } from "../../model/product.model";
+import { NotificationStatusEnum } from "../model/notification-status-enum.model";
 import { CartState } from "../state/cart-state.model";
+import { uiActions } from "./ui-slice";
 
 const initialCartState = new CartState([], 0);
 
@@ -20,8 +23,8 @@ const cartSlice = createSlice({
             let updatedItems: Item[] = [];
 
             if (existingItem) {
-                let updatedItem = { ...existingItem, quantity: existingItem.quantity + 1, totalPrice: existingItem.totalPrice + payloadProduct.price};
-                updatedItems = [ ...state.items ];
+                let updatedItem = { ...existingItem, quantity: existingItem.quantity + 1, totalPrice: existingItem.totalPrice + payloadProduct.price };
+                updatedItems = [...state.items];
                 updatedItems[existingItemIndex] = updatedItem;
             }
             else {
@@ -57,7 +60,7 @@ const cartSlice = createSlice({
             }
             else {
                 let updatedItem: Item = { ...existingItem, quantity: existingItem.quantity - 1 };
-                updatedItems = [ ...state.items ];
+                updatedItems = [...state.items];
                 updatedItems[existingItemIndex] = updatedItem;
             }
 
@@ -70,6 +73,32 @@ const cartSlice = createSlice({
         }
     }
 });
+
+export const sendCartState = (cart: CartState) => {
+    return async (dispatch: Dispatch<AnyAction>) => {
+
+
+        dispatch(uiActions.showNotification({ title: "Sending...", status: NotificationStatusEnum.PENDING, message: "Sending cart data!" }))
+
+        try {
+
+            const response = await axios.put("http://localhost:8081/carts", cart);
+            dispatch(uiActions.showNotification({ title: "Success!", status: NotificationStatusEnum.SUCCESS, message: "Sent cart data successfully!" }));
+
+        } catch (err) {
+            let errorMessage = "";
+            if (axios.isAxiosError(err)) {
+                errorMessage =err.message;
+            }
+            else {
+                const error = err as Error;
+                errorMessage = error.message || 'Something went wrong!';
+            }
+
+            dispatch(uiActions.showNotification({ title: "Error", status: NotificationStatusEnum.ERROR, message: "Sending cart data failed with error: " + errorMessage }));
+        }
+    }
+}
 
 export const cartActions = cartSlice.actions;
 export const cartReducer = cartSlice.reducer;

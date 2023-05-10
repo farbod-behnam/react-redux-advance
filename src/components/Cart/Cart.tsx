@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { Item } from '../../model/item.model';
 import { RootState } from '../../store/store';
-import Card from '../UI/Card';
+import Card from '../UI/Card/Card';
 import classes from './Cart.module.css';
 import CartItem from './CartItem';
 

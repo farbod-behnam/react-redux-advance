@@ -1,7 +1,8 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { NotificationStatus } from "../model/notification-status.model";
 import { UserInterfaceState } from "../state/user-interface-state.model";
 
-const initialUiState = new UserInterfaceState(false);
+const initialUiState = new UserInterfaceState(false, undefined);
 
 const uiSlice = createSlice({
     name: "ui",
@@ -11,6 +12,12 @@ const uiSlice = createSlice({
             return {
                 ...state,
                 cartIsVisible: !state.cartIsVisible
+            }
+        },
+        showNotification(state, action: PayloadAction<NotificationStatus>): UserInterfaceState {
+            return {
+                ...state,
+                notification: new NotificationStatus(action.payload.title, action.payload.status, action.payload.message)
             }
         }
     }
